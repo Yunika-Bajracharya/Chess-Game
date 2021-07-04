@@ -2,10 +2,11 @@
 
 SDL_Renderer *Game::renderer = nullptr;
 
-
 Game::Game() {}
 
 Game::~Game() {}
+
+Grid *grid = nullptr;
 
 void Game::init(const char *title, int xpos, int ypos, int width, int height,
                 bool fullscreen) {
@@ -19,7 +20,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
     window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
 
     if (window) {
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
@@ -31,7 +32,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   } else {
     isRunning = false;
   }
-
+  grid = new Grid();
 }
 
 void Game::handleEvents() {
@@ -48,17 +49,14 @@ void Game::handleEvents() {
   };
 }
 
-void Game::update() {
-  count++;
-
-}
+void Game::update() { count++; }
 void Game::render() {
 
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
   SDL_RenderClear(renderer);
 
-
   // TODO
+  grid->render();
 
   SDL_RenderPresent(renderer);
 }
