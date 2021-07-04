@@ -1,5 +1,5 @@
 # TODOS
-* Display board and pieces.
+  * ~~Display board and pieces.~~
   * Make use SDL2\_image is working on all machines.
 * Implement classes.
   * Implement FEN string
