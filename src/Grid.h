@@ -7,6 +7,8 @@
 #define BLOCK_WIDTH 80
 #define PIECE_VARIETY 12
 
+#define ASCII_OFFSET 48
+
 enum pieceIndex {
   Wking = 1,
   Wqueen,
@@ -27,10 +29,20 @@ public:
   Grid();
   ~Grid();
 
+  bool setupFEN(const char *FENstring);
+
   void render();
   void update();
+  void handleClick();
 
 private:
   SDL_Texture *pieceTexture;
+
   int boardState[64];
+  int dragSquare;
+
+  bool whiteTurn;
+  bool castleAvailability[4]; // KQkq
+  bool enPassantAvailable;
+  int enPassant;
 };

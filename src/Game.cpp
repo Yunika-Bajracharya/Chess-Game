@@ -44,6 +44,9 @@ void Game::handleEvents() {
     isRunning = false;
     break;
 
+  case SDL_MOUSEBUTTONDOWN:
+    break;
+
   default:
     break;
   };
