@@ -187,20 +187,29 @@ void Grid::render() {
         if (i * 8 + j == dragSquare &&
             boardState[dragSquare] == dragSquareValue) {
 
-          SDL_Rect rect;
-          rect.w = rect.h = tempDest.h;
-          SDL_GetMouseState(&rect.x, &rect.y);
-          rect.x -= rect.w / 2;
-          rect.y -= rect.h / 2;
-          TextureManager::Draw(pieceTexture, piecesSrcRect, rect);
         } else {
           TextureManager::Draw(pieceTexture, piecesSrcRect, tempDest);
         }
       }
-
       tempDest.x += BLOCK_WIDTH;
     }
     tempDest.x -= BLOCK_WIDTH * 8;
     tempDest.y += BLOCK_WIDTH;
+  }
+  // Rendering the floating piece
+
+  if (boardState[dragSquare] == dragSquareValue) {
+    SDL_Rect rect;
+    int x = (boardState[dragSquare] - 1) % 6;
+    int y = (boardState[dragSquare] - 1) / 6;
+
+    piecesSrcRect.x = x * 200;
+    piecesSrcRect.y = y * 200;
+
+    rect.w = rect.h = tempDest.h;
+    SDL_GetMouseState(&rect.x, &rect.y);
+    rect.x -= rect.w / 2;
+    rect.y -= rect.h / 2;
+    TextureManager::Draw(pieceTexture, piecesSrcRect, rect);
   }
 }
