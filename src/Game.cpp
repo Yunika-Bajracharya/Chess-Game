@@ -40,12 +40,19 @@ void Game::handleEvents() {
   SDL_PollEvent(&event);
 
   switch (event.type) {
-  case SDL_QUIT:
+  case SDL_QUIT: {
     isRunning = false;
     break;
+  }
 
-  case SDL_MOUSEBUTTONDOWN:
+  case SDL_MOUSEBUTTONDOWN: {
+    grid->handleMouseButtonDown(event);
     break;
+  }
+  case SDL_MOUSEBUTTONUP: {
+    grid->handleMouseButtonUp(event);
+    break;
+  }
 
   default:
     break;

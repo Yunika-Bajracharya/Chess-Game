@@ -33,13 +33,17 @@ public:
 
   void render();
   void update();
-  void handleClick();
+  void handleMouseButtonDown(SDL_Event &button);
+  void handleMouseButtonUp(SDL_Event &button);
 
 private:
   SDL_Texture *pieceTexture;
+  int gridStartX;
+  int gridStartY;
 
   int boardState[64];
   int dragSquare;
+  int dragSquareValue;
 
   bool whiteTurn;
   bool castleAvailability[4]; // KQkq

@@ -5,6 +5,11 @@ Grid::Grid() {
   for (int i = 0; i < 64; i++) {
     boardState[i] = 0;
   }
+  gridStartX = WINDOW_WIDTH / 2 - BLOCK_WIDTH * 4;
+  gridStartY = WINDOW_HEIGHT / 2 - BLOCK_WIDTH * 4;
+  dragSquare = 0;
+  dragSquareValue = 0;
+
   setupFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
@@ -115,13 +120,49 @@ bool Grid::setupFEN(const char *FENstring) {
   return true;
 }
 
+void Grid::handleMouseButtonDown(SDL_Event &event) {
+
+  int x = event.button.x - gridStartX;
+  int y = event.button.y - gridStartY;
+
+  if (x > 0 && y > 0 && x < 8 * BLOCK_WIDTH && y < 8 * BLOCK_WIDTH) {
+    int i = y / BLOCK_WIDTH;
+    int j = x / BLOCK_WIDTH;
+
+    std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
+    dragSquare = i * 8 + j;
+    dragSquareValue = boardState[dragSquare];
+  } else {
+    return;
+  }
+}
+
+void Grid::handleMouseButtonUp(SDL_Event &event) {
+  int x = event.button.x - gridStartX;
+  int y = event.button.y - gridStartY;
+
+  if (x > 0 && y > 0 && x < 8 * BLOCK_WIDTH && y < 8 * BLOCK_WIDTH) {
+    int i = y / BLOCK_WIDTH;
+    int j = x / BLOCK_WIDTH;
+    int temp = boardState[dragSquare]; // Mouse button down bha ko square
+    boardState[dragSquare] = 0;
+
+    std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
+    dragSquare = i * 8 + j;
+    boardState[dragSquare] = temp;
+    dragSquareValue = 0;
+  } else {
+    return;
+  }
+}
+
 void Grid::render() {
   SDL_Rect tempDest;
   SDL_Rect piecesSrcRect;
 
   tempDest.h = tempDest.w = BLOCK_WIDTH;
-  tempDest.x = WINDOW_WIDTH / 2 - BLOCK_WIDTH * 4;
-  tempDest.y = WINDOW_HEIGHT / 2 - BLOCK_WIDTH * 4;
+  tempDest.x = gridStartX;
+  tempDest.y = gridStartY;
 
   piecesSrcRect.w = piecesSrcRect.h = 200;
 
@@ -142,7 +183,19 @@ void Grid::render() {
 
         piecesSrcRect.x = x * 200;
         piecesSrcRect.y = y * 200;
-        TextureManager::Draw(pieceTexture, piecesSrcRect, tempDest);
+
+        if (i * 8 + j == dragSquare &&
+            boardState[dragSquare] == dragSquareValue) {
+
+          SDL_Rect rect;
+          rect.w = rect.h = tempDest.h;
+          SDL_GetMouseState(&rect.x, &rect.y);
+          rect.x -= rect.w / 2;
+          rect.y -= rect.h / 2;
+          TextureManager::Draw(pieceTexture, piecesSrcRect, rect);
+        } else {
+          TextureManager::Draw(pieceTexture, piecesSrcRect, tempDest);
+        }
       }
 
       tempDest.x += BLOCK_WIDTH;
