@@ -7,8 +7,8 @@
 
 #include "Grid.h"
 
-#define WINDOW_HEIGHT 640
-#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 1280
 
 class Game {
 
