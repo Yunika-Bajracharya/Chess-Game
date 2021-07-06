@@ -2,7 +2,6 @@
 
 #include "Game.h"
 #include "TextureManager.h"
-#include <SDL2/SDL.h>
 
 #define BLOCK_WIDTH 80
 #define PIECE_VARIETY 12
