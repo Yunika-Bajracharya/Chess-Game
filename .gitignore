@@ -27,5 +27,6 @@ cmake_install.cmake*
 CMakeFiles*
 CMakeCache.txt*
 notes.md*
-Chess.exe
-Chess
+Chess.exe*
+Chess*
+.cache

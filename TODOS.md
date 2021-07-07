@@ -1,11 +1,11 @@
 # TODOS
   * ~~Display board and pieces.~~
-  * Make use SDL2\_image is working on all machines.
+  * ~~Make use SDL2\_image is working on all machines.~~
 * Implement classes.
   * Implement FEN string
-  * Drag and drop Pieces.
+  * ~~Drag and drop Pieces.~~
 * Implement The player class.
-* Implement sound.
+* ~~Implement sound.~~ -> Implement better sound effects
 * Implementing Movement
   * We highlight the squares.
   * Rocks and bishops

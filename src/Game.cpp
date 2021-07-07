@@ -27,6 +27,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
     if (renderer) {
       std::cout << "renderer created" << std::endl;
     }
+    // Opacity power
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+      printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n",
+             Mix_GetError());
+    }
 
     isRunning = true;
   } else {
@@ -62,7 +69,7 @@ void Game::handleEvents() {
 void Game::update() { count++; }
 void Game::render() {
 
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   SDL_RenderClear(renderer);
 
   // TODO
@@ -73,6 +80,8 @@ void Game::render() {
 void Game::clean() {
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
+  Mix_Quit();
+  IMG_Quit();
   SDL_Quit();
 
   std::cout << "Game cleared" << std::endl;
