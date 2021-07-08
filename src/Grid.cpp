@@ -208,9 +208,17 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
     // Make enPassant work
     if (temp == Wpawn || temp == Bpawn) {
       int offset = (Wpawn == temp) ? 16 : -16;
-      if (dragSquare - i * 8 + j == offset) {
+      if (enPassantAvailable && (i * 8 + j) == enPassant) {
+        int killLocation = i * 8 + j + offset / 2;
+        boardState[killLocation] = empty;
+        enPassantAvailable = false;
+      } else {
+        enPassantAvailable = false;
+      }
+      if ((dragSquare - (i * 8 + j)) == offset) {
         enPassantAvailable = true;
-        enPassant = dragSquare + offset / 2;
+        enPassant = dragSquare - offset / 2;
+        std::cout << "En passant Available at " << enPassant << std::endl;
       }
     } else {
       enPassantAvailable = false;
@@ -329,6 +337,9 @@ bool Grid::generateMoves() {
 
         moves.push_back(
             {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
       }
     }
     return true;
@@ -346,6 +357,9 @@ bool Grid::generateMoves() {
 
         moves.push_back(
             {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
       }
     }
     return true;
@@ -409,9 +423,11 @@ bool Grid::generateMoves() {
         if (!isValidPieceLocation(pieceLocation)) {
           break;
         }
-
         moves.push_back(
             {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
       }
     }
     for (int i = 0; i < 4; i++) {
@@ -426,6 +442,9 @@ bool Grid::generateMoves() {
 
         moves.push_back(
             {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
       }
     }
     return true;
@@ -487,13 +506,11 @@ bool Grid::isValidPieceLocation(const Coordinate &location) {
     if (indexPiece == empty) {
       if (dragSquareValue == Wpawn || dragSquareValue == Bpawn) {
 
-        /*
         if (enPassantAvailable) {
           if (enPassant == index) {
             return true;
           }
         }
-        */
 
         // If it is a pawn making a diagonal move on an empty square
         if ((dragSquare - index) % 8 != 0) {
