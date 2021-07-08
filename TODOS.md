@@ -4,13 +4,15 @@
 * Implement classes.
   * Implement FEN string
   * ~~Drag and drop Pieces.~~
-* Implement The player class.
 * ~~Implement sound.~~ -> Implement better sound effects
-* Implementing Movement
-  * We highlight the squares.
-  * Rocks and bishops
-  * King and Queen
-  * Knights and paws
+* ~~Implementing Movement~~
+  * ~~We highlight the squares.~~
+  * ~~Rocks and bishops~~
+  * ~~King and Queen~~
+  * ~~Knights and paws~~ 
+  * Castle
+* Checks
+
 
 ## TODOS Part 2
 The nice to haves

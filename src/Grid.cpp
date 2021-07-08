@@ -180,6 +180,21 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
     int i = y / BLOCK_WIDTH;
     int j = x / BLOCK_WIDTH;
     pieceIndex temp = boardState[dragSquare]; // Mouse button down bha ko square
+
+    // Check if it is a valid move
+    bool valid = false;
+    for (Move move : moves) {
+      if (move.end == i * 8 + j) {
+        valid = true;
+      }
+    }
+    if (!valid) {
+      dragSquareValue = empty;
+      moves.clear();
+      return;
+    }
+
+    // Previous place is empty now
     boardState[dragSquare] = empty;
 
     // We store some info about the last move
@@ -190,6 +205,26 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
     // Play sound
     Mix_PlayChannel(-1, moveSound, 0);
 
+    // Make enPassant work
+    if (temp == Wpawn || temp == Bpawn) {
+      int offset = (Wpawn == temp) ? 16 : -16;
+      if (enPassantAvailable && (i * 8 + j) == enPassant) {
+        int killLocation = i * 8 + j + offset / 2;
+        boardState[killLocation] = empty;
+        enPassantAvailable = false;
+      } else {
+        enPassantAvailable = false;
+      }
+      if ((dragSquare - (i * 8 + j)) == offset) {
+        enPassantAvailable = true;
+        enPassant = dragSquare - offset / 2;
+        std::cout << "En passant Available at " << enPassant << std::endl;
+      }
+    } else {
+      enPassantAvailable = false;
+    }
+
+    // We change the location to new
     std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
     dragSquare = i * 8 + j; // Now we change the drag square value
     boardState[dragSquare] = temp;
@@ -283,38 +318,222 @@ bool Grid::generateMoves() {
   if (boardState[dragSquare] != dragSquareValue || dragSquareValue == empty) {
     return false;
   }
-  // int bishopOffset[4] = {-7, -9, 7, 9};
   Coordinate rookOffset[4] = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+  Coordinate bishopOffset[4] = {{1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
+  Coordinate knightOffset[8] = {{-1, 2}, {1, 2},  {1, -2},  {-1, -2},
+                                {2, 1},  {-2, 1}, {-2, -1}, {2, -1}};
 
   if (dragSquareValue == Wrook || dragSquareValue == Brook) {
     for (int i = 0; i < 4; i++) {
       Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
 
-      // .i, .j refering to object ko variable, i refering to loop index
-      pieceLocation.i += rookOffset[i].i;
-      pieceLocation.j += rookOffset[i].j;
-
-      while (isValidPieceLocation(pieceLocation)) {
-        moves.push_back(
-            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+      while (true) {
+        // .i, .j refering to object ko variable, i refering to loop index
         pieceLocation.i += rookOffset[i].i;
         pieceLocation.j += rookOffset[i].j;
+        if (!isValidPieceLocation(pieceLocation)) {
+          break;
+        }
+
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
       }
     }
     return true;
 
-  } else if (dragSquare == Wbishop || dragSquareValue == Bbishop) {
+  } else if (dragSquareValue == Wbishop || dragSquareValue == Bbishop) {
+    for (int i = 0; i < 4; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      while (true) {
+        // .i, .j refering to object ko variable, i refering to loop index
+        pieceLocation.i += bishopOffset[i].i;
+        pieceLocation.j += bishopOffset[i].j;
+        if (!isValidPieceLocation(pieceLocation)) {
+          break;
+        }
 
-  } else {
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
+      }
+    }
+    return true;
+
+  } else if (dragSquareValue == Wpawn || dragSquareValue == Bpawn) {
+
+    Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+
+    Coordinate offset[2] = {{-1, 0}, {-2, 0}};
+    Coordinate enPassantoffset[2] = {{-1, -1}, {-1, 1}};
+    int initialRow;
+    if (dragSquareValue == Wpawn) {
+      offset[0] = {-1, 0};
+      offset[1] = {-2, 0};
+      enPassantoffset[0] = {-1, -1};
+      enPassantoffset[1] = {-1, 1};
+      initialRow = 6;
+    } else {
+      offset[0] = {1, 0};
+      offset[1] = {2, 0};
+      enPassantoffset[0] = {1, -1};
+      enPassantoffset[1] = {1, 1};
+      initialRow = 1;
+    }
+
+    pieceLocation.i += offset[0].i;
+    pieceLocation.j += offset[0].j;
+    if (isValidPieceLocation(pieceLocation) &&
+        boardState[pieceLocation.i * 8 + pieceLocation.j] == empty) {
+      moves.push_back(
+          {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+    }
+
+    pieceLocation = {dragSquare / 8, dragSquare % 8};
+    if (pieceLocation.i == initialRow) {
+      pieceLocation.i += offset[1].i;
+      pieceLocation.j += offset[1].j;
+      if (isValidPieceLocation(pieceLocation) &&
+          boardState[pieceLocation.i * 8 + pieceLocation.j] == empty) {
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+      }
+    }
+    for (int i = 0; i < 2; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      pieceLocation.i += enPassantoffset[i].i;
+      pieceLocation.j += enPassantoffset[i].j;
+      if (isValidPieceLocation(pieceLocation)) {
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+      }
+    }
+
+  } else if (dragSquareValue == Wqueen || dragSquareValue == Bqueen) {
+    for (int i = 0; i < 4; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      while (true) {
+        // .i, .j refering to object ko variable, i refering to loop index
+        pieceLocation.i += rookOffset[i].i;
+        pieceLocation.j += rookOffset[i].j;
+        if (!isValidPieceLocation(pieceLocation)) {
+          break;
+        }
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
+      }
+    }
+    for (int i = 0; i < 4; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      while (true) {
+        // .i, .j refering to object ko variable, i refering to loop index
+        pieceLocation.i += bishopOffset[i].i;
+        pieceLocation.j += bishopOffset[i].j;
+        if (!isValidPieceLocation(pieceLocation)) {
+          break;
+        }
+
+        moves.push_back(
+            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
+          break;
+        }
+      }
+    }
+    return true;
+
+  } else if (dragSquareValue == Wking || dragSquareValue == Bking) {
+    for (int i = 0; i < 4; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      // .i, .j refering to object ko variable, i refering to loop index
+      pieceLocation.i += rookOffset[i].i;
+      pieceLocation.j += rookOffset[i].j;
+      if (!isValidPieceLocation(pieceLocation)) {
+        continue;
+      }
+      moves.push_back(
+          {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+    }
+    for (int i = 0; i < 4; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      // .i, .j refering to object ko variable, i refering to loop index
+      pieceLocation.i += bishopOffset[i].i;
+      pieceLocation.j += bishopOffset[i].j;
+      if (!isValidPieceLocation(pieceLocation)) {
+        continue;
+      }
+
+      moves.push_back(
+          {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+    }
+    return true;
+
+  } else if (dragSquareValue == Wknight || dragSquareValue == Bknight) {
+    for (int i = 0; i < 8; i++) {
+      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+      // .i, .j refering to object ko variable, i refering to loop index
+      pieceLocation.i += knightOffset[i].i;
+      pieceLocation.j += knightOffset[i].j;
+      if (!isValidPieceLocation(pieceLocation)) {
+        continue;
+      }
+      moves.push_back(
+          {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+    }
+    return true;
+  }
+
+  else {
     return false;
   }
 
   return true;
 }
 
-bool Grid::isValidPieceLocation(Coordinate &location) {
+bool Grid::isValidPieceLocation(const Coordinate &location) {
   if (location.i >= 0 && location.j >= 0 && location.i <= 7 &&
       location.j <= 7) {
+    int index = location.i * 8 + location.j;
+    pieceIndex indexPiece = boardState[index];
+
+    if (indexPiece == empty) {
+      if (dragSquareValue == Wpawn || dragSquareValue == Bpawn) {
+
+        if (enPassantAvailable) {
+          if (enPassant == index) {
+            return true;
+          }
+        }
+
+        // If it is a pawn making a diagonal move on an empty square
+        if ((dragSquare - index) % 8 != 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (whiteTurn) {
+      if (indexPiece >= Bking) {
+        return true;
+      } else
+        return false;
+
+    } else {
+      // If black's turn
+      if (indexPiece < Bking) {
+        return true;
+      } else
+        return false;
+    }
+
     return true;
   } else
     return false;

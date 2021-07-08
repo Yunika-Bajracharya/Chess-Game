@@ -51,7 +51,7 @@ public:
   // Looks at the current dragSquare and dragSquareValue and generates moves.
   bool generateMoves();
 
-  static bool isValidPieceLocation(Coordinate &location);
+  bool isValidPieceLocation(const Coordinate &location);
 
 private:
   SDL_Texture *pieceTexture;
