@@ -10,7 +10,7 @@
   * ~~Rocks and bishops~~
   * ~~King and Queen~~
   * ~~Knights and paws~~ 
-  * Castle
+  * ~~Castle~~
 * Checks
 
 

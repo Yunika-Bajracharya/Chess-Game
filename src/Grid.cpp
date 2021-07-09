@@ -202,6 +202,8 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
     lastMove.start = dragSquare;
     lastMove.end = i * 8 + j;
 
+    // If either the start or end of last move touches rook, we disable castling
+
     // Play sound
     Mix_PlayChannel(-1, moveSound, 0);
 
@@ -222,6 +224,40 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
       }
     } else {
       enPassantAvailable = false;
+    }
+
+    // If it was a castle
+    if (temp == Wking || temp == Bking) {
+      // We have a castle move if
+      if ((lastMove.end - lastMove.start) == 2) {
+        // We move the rook too
+        if (boardState[lastMove.end + 1] == Wrook ||
+            boardState[lastMove.end + 1] == Brook) {
+          // Last check to see if there is a rook there
+
+          boardState[lastMove.end + 1] = empty;
+          boardState[lastMove.end - 1] = (temp == Wking) ? Wrook : Brook;
+        }
+      }
+      if ((lastMove.end - lastMove.start) == -2) {
+        // We move the rook too
+        //
+        if (boardState[lastMove.end - 2] == Wrook ||
+            boardState[lastMove.end - 2] == Brook) {
+          // Last check to see if there is a rook there
+
+          boardState[lastMove.end - 2] = empty;
+          boardState[lastMove.end + 1] = (temp == Wking) ? Wrook : Brook;
+        }
+      }
+      if (temp == Wking) {
+        castleAvailability[0] = false;
+        castleAvailability[1] = false;
+      }
+      if (temp == Bking) {
+        castleAvailability[2] = false;
+        castleAvailability[3] = false;
+      }
     }
 
     // We change the location to new
@@ -406,6 +442,8 @@ bool Grid::generateMoves() {
     return true;
 
   } else if (dragSquareValue == Wking || dragSquareValue == Bking) {
+    Coordinate castleOffset[2] = {{0, 2}, {0, -2}};
+
     for (int i = 0; i < 8; i++) {
       Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
       // .i, .j refering to object ko variable, i refering to loop index
@@ -417,7 +455,39 @@ bool Grid::generateMoves() {
       moves.push_back(
           {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
     }
-    return true;
+
+    // Checks for castle
+    if ((dragSquareValue == Wking &&
+         (castleAvailability[0] || castleAvailability[1])) ||
+        (dragSquareValue == Bking &&
+         (castleAvailability[2] || castleAvailability[3]))) {
+
+      int start = dragSquareValue == Wking ? 0 : 2;
+      for (int i = start; i < start + 2; i++) {
+        if (!castleAvailability[i])
+          continue;
+        Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
+        bool castleable = true;
+
+        int shiftTillFactorof8 = (i - start) ? -1 : 2;
+
+        int j = dragSquare + castleOffset[i - start].j / 2;
+        while ((j + shiftTillFactorof8) % 8 != 0) {
+          if (boardState[j] != empty) {
+            castleable = false;
+            break;
+          }
+          j += castleOffset[i - start].j / 2;
+        }
+        pieceLocation.i += castleOffset[i - start].i;
+        pieceLocation.j += castleOffset[i - start].j;
+
+        if (isValidPieceLocation(pieceLocation) && castleable) {
+          moves.push_back(
+              {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        }
+      }
+    }
 
   } else if (dragSquareValue == Wknight || dragSquareValue == Bknight) {
     for (int i = 0; i < 8; i++) {
