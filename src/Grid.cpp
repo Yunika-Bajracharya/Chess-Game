@@ -318,19 +318,29 @@ bool Grid::generateMoves() {
   if (boardState[dragSquare] != dragSquareValue || dragSquareValue == empty) {
     return false;
   }
-  Coordinate rookOffset[4] = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
-  Coordinate bishopOffset[4] = {{1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
   Coordinate knightOffset[8] = {{-1, 2}, {1, 2},  {1, -2},  {-1, -2},
                                 {2, 1},  {-2, 1}, {-2, -1}, {2, -1}};
+  Coordinate slideOffset[8] = {{1, 0}, {-1, 0},  {0, -1}, {0, 1},
+                               {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
 
-  if (dragSquareValue == Wrook || dragSquareValue == Brook) {
-    for (int i = 0; i < 4; i++) {
+  if (dragSquareValue == Wrook || dragSquareValue == Brook ||
+      dragSquareValue == Wbishop || dragSquareValue == Bbishop ||
+      dragSquareValue == Wqueen || dragSquareValue == Bqueen) {
+
+    int start = (dragSquareValue == Wrook || dragSquareValue == Brook ||
+                 dragSquareValue == Wqueen || dragSquareValue == Bqueen)
+                    ? 0
+                    : 4;
+    int width =
+        (dragSquareValue == Wqueen || dragSquareValue == Bqueen) ? 8 : 4;
+
+    for (int i = start; i < start + width; i++) {
       Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
 
       while (true) {
         // .i, .j refering to object ko variable, i refering to loop index
-        pieceLocation.i += rookOffset[i].i;
-        pieceLocation.j += rookOffset[i].j;
+        pieceLocation.i += slideOffset[i].i;
+        pieceLocation.j += slideOffset[i].j;
         if (!isValidPieceLocation(pieceLocation)) {
           break;
         }
@@ -343,27 +353,6 @@ bool Grid::generateMoves() {
       }
     }
     return true;
-
-  } else if (dragSquareValue == Wbishop || dragSquareValue == Bbishop) {
-    for (int i = 0; i < 4; i++) {
-      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
-      while (true) {
-        // .i, .j refering to object ko variable, i refering to loop index
-        pieceLocation.i += bishopOffset[i].i;
-        pieceLocation.j += bishopOffset[i].j;
-        if (!isValidPieceLocation(pieceLocation)) {
-          break;
-        }
-
-        moves.push_back(
-            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
-        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
-          break;
-        }
-      }
-    }
-    return true;
-
   } else if (dragSquareValue == Wpawn || dragSquareValue == Bpawn) {
 
     Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
@@ -391,18 +380,20 @@ bool Grid::generateMoves() {
         boardState[pieceLocation.i * 8 + pieceLocation.j] == empty) {
       moves.push_back(
           {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
-    }
 
-    pieceLocation = {dragSquare / 8, dragSquare % 8};
-    if (pieceLocation.i == initialRow) {
-      pieceLocation.i += offset[1].i;
-      pieceLocation.j += offset[1].j;
-      if (isValidPieceLocation(pieceLocation) &&
-          boardState[pieceLocation.i * 8 + pieceLocation.j] == empty) {
-        moves.push_back(
-            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+      // We check for 2 square move
+      pieceLocation = {dragSquare / 8, dragSquare % 8};
+      if (pieceLocation.i == initialRow) {
+        pieceLocation.i += offset[1].i;
+        pieceLocation.j += offset[1].j;
+        if (isValidPieceLocation(pieceLocation) &&
+            boardState[pieceLocation.i * 8 + pieceLocation.j] == empty) {
+          moves.push_back(
+              {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
+        }
       }
     }
+
     for (int i = 0; i < 2; i++) {
       Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
       pieceLocation.i += enPassantoffset[i].i;
@@ -412,64 +403,17 @@ bool Grid::generateMoves() {
             {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
       }
     }
-
-  } else if (dragSquareValue == Wqueen || dragSquareValue == Bqueen) {
-    for (int i = 0; i < 4; i++) {
-      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
-      while (true) {
-        // .i, .j refering to object ko variable, i refering to loop index
-        pieceLocation.i += rookOffset[i].i;
-        pieceLocation.j += rookOffset[i].j;
-        if (!isValidPieceLocation(pieceLocation)) {
-          break;
-        }
-        moves.push_back(
-            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
-        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
-          break;
-        }
-      }
-    }
-    for (int i = 0; i < 4; i++) {
-      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
-      while (true) {
-        // .i, .j refering to object ko variable, i refering to loop index
-        pieceLocation.i += bishopOffset[i].i;
-        pieceLocation.j += bishopOffset[i].j;
-        if (!isValidPieceLocation(pieceLocation)) {
-          break;
-        }
-
-        moves.push_back(
-            {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
-        if (boardState[pieceLocation.i * 8 + pieceLocation.j] != empty) {
-          break;
-        }
-      }
-    }
     return true;
 
   } else if (dragSquareValue == Wking || dragSquareValue == Bking) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
       Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
       // .i, .j refering to object ko variable, i refering to loop index
-      pieceLocation.i += rookOffset[i].i;
-      pieceLocation.j += rookOffset[i].j;
+      pieceLocation.i += slideOffset[i].i;
+      pieceLocation.j += slideOffset[i].j;
       if (!isValidPieceLocation(pieceLocation)) {
         continue;
       }
-      moves.push_back(
-          {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
-    }
-    for (int i = 0; i < 4; i++) {
-      Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};
-      // .i, .j refering to object ko variable, i refering to loop index
-      pieceLocation.i += bishopOffset[i].i;
-      pieceLocation.j += bishopOffset[i].j;
-      if (!isValidPieceLocation(pieceLocation)) {
-        continue;
-      }
-
       moves.push_back(
           {true, dragSquare, pieceLocation.i * 8 + pieceLocation.j});
     }
