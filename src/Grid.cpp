@@ -260,11 +260,18 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
       }
     }
 
+    // it a pawn reaches promotion square
+    if (temp == Wpawn || temp == Bpawn) {
+      if (i == 0 || i == 7) {
+        temp = (temp == Wpawn) ? Wqueen : Bqueen;
+      }
+    }
+
     // We change the location to new
     std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
-    dragSquare = i * 8 + j; // Now we change the drag square value
-    boardState[dragSquare] = temp;
-    dragSquareValue = empty;
+    dragSquare = i * 8 + j;        // Now we change the drag square value
+    boardState[dragSquare] = temp; // Put the piece is that square
+    dragSquareValue = empty;       // Make the start square empty
 
     whiteTurn = !whiteTurn;
 
@@ -389,6 +396,7 @@ bool Grid::generateMoves() {
       }
     }
     return true;
+
   } else if (dragSquareValue == Wpawn || dragSquareValue == Bpawn) {
 
     Coordinate pieceLocation = {dragSquare / 8, dragSquare % 8};

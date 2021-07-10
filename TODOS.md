@@ -11,6 +11,9 @@
   * ~~King and Queen~~
   * ~~Knights and paws~~ 
   * ~~Castle~~
+  * Promotion
+      * Make a pop up window of sorts?
+
 * Checks
 
 
