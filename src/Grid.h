@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Engine.h"
 #include "Game.h"
 #include "Player.h"
+#include "Structures.h"
 #include "TextureManager.h"
 #include <vector>
 
@@ -9,32 +11,6 @@
 #define PIECE_VARIETY 12
 
 #define ASCII_OFFSET 48
-
-struct Move {
-  bool made;
-  int start;
-  int end;
-};
-
-struct Coordinate {
-  int i, j;
-};
-
-enum pieceIndex {
-  empty = 0,
-  Wking = 1,
-  Wqueen,
-  Wbishop,
-  Wknight,
-  Wrook,
-  Wpawn,
-  Bking,
-  Bqueen,
-  Bbishop,
-  Bknight,
-  Brook,
-  Bpawn,
-};
 
 class Grid {
 public:
@@ -52,6 +28,7 @@ public:
   bool generateMoves();
 
   bool isValidPieceLocation(const Coordinate &location);
+  void filterLegalMoves();
 
 private:
   SDL_Texture *pieceTexture;
@@ -59,16 +36,20 @@ private:
   int gridStartX;
   int gridStartY;
 
-  pieceIndex boardState[64];
   std::vector<Move> moves;
+  State state;
+
+  Move lastMove;
   Player players[2];
 
+  /*
+  pieceIndex boardState[64];
   int dragSquare;
   pieceIndex dragSquareValue;
-  Move lastMove;
 
   bool whiteTurn;
   bool castleAvailability[4]; // KQkq
   bool enPassantAvailable;
   int enPassant;
+  */
 };
