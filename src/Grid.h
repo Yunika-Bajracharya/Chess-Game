@@ -21,8 +21,12 @@ public:
 
   void render();
   void update();
+
   void handleMouseButtonDown(SDL_Event &button);
+  void handlePieceSelection(Coordinate &location);
+
   void handleMouseButtonUp(SDL_Event &button);
+  void handlePiecePlacement(Coordinate &location);
 
   // Looks at the current dragSquare and dragSquareValue and generates moves.
   bool generateMoves();
@@ -41,15 +45,4 @@ private:
 
   Move lastMove;
   Player players[2];
-
-  /*
-  pieceIndex boardState[64];
-  int dragSquare;
-  pieceIndex dragSquareValue;
-
-  bool whiteTurn;
-  bool castleAvailability[4]; // KQkq
-  bool enPassantAvailable;
-  int enPassant;
-  */
 };
