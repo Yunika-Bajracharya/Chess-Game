@@ -1,8 +1,8 @@
 ## Chess
 
-###Requirements
-*SDL2
-*SDL2_image, SDL2_mixer, SDL2_ttf
+### Requirements
+* SDL2
+* SDL2_image, SDL2_mixer, SDL2_ttf
 
 ### Developers
 1. Suban Shrestha 076BCT082 ([@suban244](https://github.com/suban244))
