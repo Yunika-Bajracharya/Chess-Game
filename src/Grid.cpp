@@ -39,8 +39,8 @@ void Grid::handleMouseButtonDown(SDL_Event &event) {
   if (x > 0 && y > 0 && x < 8 * BLOCK_WIDTH && y < 8 * BLOCK_WIDTH) {
     int i = y / BLOCK_WIDTH;
     int j = x / BLOCK_WIDTH;
-    std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
     Coordinate location = {i, j};
+    location.display();
     Engine::handlePieceSelection(location, state, moves);
   } else {
     return;
@@ -59,9 +59,25 @@ void Grid::handleMouseButtonUp(SDL_Event &event) {
     int i = y / BLOCK_WIDTH;
     int j = x / BLOCK_WIDTH;
     Coordinate location = {i, j};
+    location.display();
 
     Engine::handlePiecePlacement(location, state, moves, lastMove);
     Mix_PlayChannel(-1, moveSound, 0);
+    
+    // We shout check here
+    if(Engine::directAttack(state, !state.isWhiteTurn)) {
+      std::cout << "Check" << std::endl;
+      check = true;
+    }else {
+      check = false;
+    }
+
+    // If this is checkmate, then dandy
+    if(check) {
+      if(Engine::checkmate(state)) {
+        std::cout << "CheckMate" << std::endl;
+      } 
+    }
 
   } else {
     return;

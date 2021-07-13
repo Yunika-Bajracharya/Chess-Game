@@ -108,8 +108,6 @@ bool Engine::setupFEN(State &state, const char *FENstring) {
 void Engine::handlePieceSelection(Coordinate &location, State &state,
                                   std::vector<Move> &moves) {
 
-  std::cout << (check(state) ? "Check" : "No Check") << std::endl;
-
   int index = location.i * 8 + location.j;
   pieceIndex indexPiece = state.boardState[index];
   if (state.isWhiteTurn) {
@@ -176,7 +174,6 @@ void Engine::handlePiecePlacement(Coordinate &location, State &state,
     if ((state.dragSquare - (index)) == offset) {
       state.enPassantAvailable = true;
       state.enPassant = state.dragSquare - offset / 2;
-      std::cout << "En passant Available at " << state.enPassant << std::endl;
     }
   } else {
     state.enPassantAvailable = false;
@@ -224,7 +221,6 @@ void Engine::handlePiecePlacement(Coordinate &location, State &state,
   }
 
   // We change the location to new
-  std::cout << "Pos: (" << location.i << ", " << location.j << ")" << std::endl;
   state.dragSquare = index; // Now we change the drag square value
   state.boardState[state.dragSquare] = temp; // Put the piece is that square
   state.dragSquareValue = empty;             // Make the start square empty
@@ -233,6 +229,7 @@ void Engine::handlePiecePlacement(Coordinate &location, State &state,
 }
 
 bool Engine::generateLegalMoves(const State &state, std::vector<Move> &moves) {
+  moves.clear();
   std::vector<Move> newMoves;
   generatePseudoLegalMoves(state, newMoves);
 
@@ -243,7 +240,7 @@ bool Engine::generateLegalMoves(const State &state, std::vector<Move> &moves) {
 
     Engine::handlePiecePlacement(location, newState, newMoves, lastMove);
     // We check if our king is still in danger, if no bad move.
-    if (!check(newState)) {
+    if (!directAttack(newState, newState.isWhiteTurn)) {
       moves.push_back(move);
     }
   }
@@ -462,12 +459,12 @@ bool Engine::isValidPieceLocation(const Coordinate &location,
     return false;
 }
 
-bool Engine::check(const State &state) {
-  pieceIndex startPiece = state.isWhiteTurn ? Wking : Bking;
-  pieceIndex endPiece = state.isWhiteTurn ? Wpawn : Bpawn;
+bool Engine::directAttack(const State &state, bool isWhiteTurn) {
+  pieceIndex startPiece = isWhiteTurn ? Wking : Bking;
+  pieceIndex endPiece = isWhiteTurn ? Wpawn : Bpawn;
 
   // Find the square of the king
-  pieceIndex searchPiece = state.isWhiteTurn ? Bking : Wking;
+  pieceIndex searchPiece = isWhiteTurn ? Bking : Wking;
   int kingIndex = -1;
   for (int i = 0; i < 64; i++) {
     if (state.boardState[i] == searchPiece) {
@@ -488,6 +485,7 @@ bool Engine::check(const State &state) {
       State newState = state;
       newState.dragSquare = i;
       newState.dragSquareValue = newState.boardState[i];
+      newState.isWhiteTurn = isWhiteTurn;
 
       // newState.isWhiteTurn = !newState.isWhiteTurn;
       std::vector<Move> moves;
@@ -503,4 +501,29 @@ bool Engine::check(const State &state) {
   }
 
   return false;
+}
+
+bool Engine::checkmate(const State &state) {
+  // Figures out if the person  whose turn it is currently is actually check mated.
+
+  pieceIndex startPiece = state.isWhiteTurn ? Wking : Bking;
+  pieceIndex endPiece = state.isWhiteTurn ? Wpawn : Bpawn;
+  // Find the square of the king
+  // pieceIndex searchPiece = state.isWhiteTurn ? Bking : Wking;
+
+	State newState = state;
+  for(int i = 0; i < 64; i++) {
+    if (state.boardState[i] >= startPiece && state.boardState[i] <= endPiece) {
+			std::vector<Move> moves;
+
+			newState.dragSquare = i;
+			newState.dragSquareValue = state.boardState[i];
+
+			Engine::generateLegalMoves(newState, moves);
+			if(!moves.empty()) {
+				return false;
+			}
+    }
+  }
+	return true;
 }

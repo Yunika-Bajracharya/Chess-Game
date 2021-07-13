@@ -21,5 +21,7 @@ public:
   static bool isValidPieceLocation(const Coordinate &location,
                                    const State &state);
 
-  static bool check(const State &state);
+  static bool directAttack(const State &state, bool isWhiteTurn);
+
+  static bool checkmate(const State &state);
 };

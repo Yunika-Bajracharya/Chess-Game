@@ -2,6 +2,9 @@
 
 struct Coordinate {
   int i, j;
+  void display() {
+    std::cout << "Pos: (" << i << ", " << j << ")" << std::endl;
+  }
 };
 
 enum pieceIndex {

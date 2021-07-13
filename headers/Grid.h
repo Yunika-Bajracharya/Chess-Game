@@ -42,6 +42,7 @@ private:
 
   std::vector<Move> moves;
   State state;
+  bool check;
 
   Move lastMove;
   Player players[2];
