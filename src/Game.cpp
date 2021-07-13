@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "../headers/Game.h"
 
 SDL_Renderer *Game::renderer = nullptr;
 

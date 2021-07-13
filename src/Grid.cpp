@@ -1,4 +1,4 @@
-#include "Grid.h"
+#include "../headers/Grid.h"
 #include <vector>
 
 Grid::Grid() {

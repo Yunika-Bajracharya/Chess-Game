@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "../headers/Engine.h"
 
 bool Engine::setupFEN(State &state, const char *FENstring) {
   int i = 0; // Loopinng through string
